@@ -1,6 +1,6 @@
 # BEGIN block: Initialize DXF header and section
 BEGIN {
-    faceVertices[0,0]=0
+    # faceVertices[0,0]=0
     print "0"
     print "SECTION"
     print "2"
@@ -47,8 +47,8 @@ BEGIN {
         for(a = 1; a <= faces; a++){
             faceVerticesNum = $1
             for(b = 1; b <= faceVerticesNum; b++){
-                faceVertices[a,b] = $(b+1)
-                # print faceVertices[2,3]
+                faceVertices[a][b] = $(b+1)
+                print faceVertices[a][b]
             }       
         getline
         }
@@ -88,15 +88,16 @@ END{
         print "0"  # Layer name
 
         for(j = 1; j <= faceVerticesNum; j++){
+
             l = 1
             print j + "9"
-            print vertexList[faceVertices[i,j]+1,l]  # X coordinate of vertex 1
+            print vertexList[faceVertices[i][j]+1,l]  # X coordinate of vertex 1
             l++
             print j + "19"
-            print vertexList[faceVertices[i,j]+1,l]  # Y coordinate of vertex 1
+            print vertexList[faceVertices[i][j]+1,l]  # Y coordinate of vertex 1
             print j + "29"
             l++
-            print vertexList[faceVertices[i,j]+1,l]  # Z coordinate of vertex 1
+            print vertexList[faceVertices[i][j]+1,l]  # Z coordinate of vertex 1
         }
             print "0"  # End of LINE entity
     }
