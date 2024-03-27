@@ -1,6 +1,4 @@
-# BEGIN block: Initialize DXF header and section
 BEGIN {
-    # faceVertices[0,0]=0
     print "0"
     print "SECTION"
     print "2"
@@ -61,10 +59,6 @@ BEGIN {
 }
 
 END{
-        # for(k = 1; k <= faces; k++){
-        #     faceVertices[k] = vertexList[i];
-
-        # }
     
     for(i = 1; i <= vertices; i++){
         print "VERTEX"
@@ -80,8 +74,6 @@ END{
     }
     for (i = 1; i <= faces; i++) {
         print "FACE"
-        # getline
-        # split($0, indices)
 
         print "0"
         print "8"
