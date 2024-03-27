@@ -43,18 +43,13 @@ BEGIN {
                 getline 
         }
         for(a = 1; a <= faces; a++){
-            faceVerticesNum = $1
-            for(b = 1; b <= faceVerticesNum; b++){
+            faceVerticesNum[a] = $1
+            for(b = 1; b <= faceVerticesNum[a]; b++){
                 faceVertices[a][b] = $(b+1)
-                print faceVertices[a][b]
+                # print faceVertices[a][b]
             }       
         getline
         }
-
-
-
-
-
     }
 }
 
@@ -79,17 +74,23 @@ END{
         print "8"
         print "0"  # Layer name
 
-        for(j = 1; j <= faceVerticesNum; j++){
-
+        for(j = 1; j <= faceVerticesNum[i]; j++){
+            # print faceVerticesNum[i]
             l = 1
-            print j + "9"
-            print vertexList[faceVertices[i][j]+1,l]  # X coordinate of vertex 1
-            l++
-            print j + "19"
-            print vertexList[faceVertices[i][j]+1,l]  # Y coordinate of vertex 1
-            print j + "29"
-            l++
-            print vertexList[faceVertices[i][j]+1,l]  # Z coordinate of vertex 1
+            # print j + "9"
+            # print vertexList[faceVertices[i][j]+1,l]  # X coordinate of vertex 1
+            # l++
+            # print j + "19"
+            # print vertexList[faceVertices[i][j]+1,l]  # Y coordinate of vertex 1
+            # print j + "29"
+            # l++
+            # print vertexList[faceVertices[i][j]+1,l]  # Z coordinate of vertex 1
+            while(l <= 3){
+                print (10 * l)
+                print vertexList[faceVertices[i][j]+1,l]
+                l++;
+            }
+
         }
             print "0"  # End of LINE entity
     }
