@@ -1,5 +1,6 @@
 # BEGIN block: Initialize DXF header and section
 BEGIN {
+    faceVertices[0,0]=0
     print "0"
     print "SECTION"
     print "2"
@@ -33,30 +34,38 @@ BEGIN {
 /^element face/ {
     faces = $3
 }
-
-NR == x{
-    faceVerticesNum = $1
-    for(a = 1; a <= faces; a++){
-        for(b = 1; b <= faceVerticesNum; b++){
-            faceVertices[a,b] = $(b+1)
+{
+    if($1 ~ /^(end_header)$/){
+        getline
+        for (i = 1; i <= vertices; i++) {
+            for (j = 1; j < vertices; j++) {
+                vertexList[i,j] = $j
+                # print vertexList[i,j]
+            }
+                getline 
         }
+        for(a = 1; a <= faces; a++){
+            faceVerticesNum = $1
+            for(b = 1; b <= faceVerticesNum; b++){
+                faceVertices[a,b] = $(b+1)
+                # print faceVertices[2,3]
+            }       
+        getline
+        }
+
+
+
+
+
     }
 }
-/^end_header/{
-    i = 1
-    getline
-    x = NR + vertices
-    for (i = 1; i <= vertices; i++) {
-        for (j = 1; j < vertices; j++) {
-            vertexList[i,j] = $j
-        }
 
+END{
         # for(k = 1; k <= faces; k++){
         #     faceVertices[k] = vertexList[i];
 
         # }
-            getline
-    }
+    
     for(i = 1; i <= vertices; i++){
         print "VERTEX"
         print "8"
@@ -76,18 +85,20 @@ NR == x{
 
         print "0"
         print "8"
-        print "0"  # Layer name, adjust as needed
-        for(j = 1; j < 4; j++){
-            # print vertexList[i,j];
+        print "0"  # Layer name
 
+        for(j = 1; j <= faceVerticesNum; j++){
+            l = 1
             print j + "9"
-            print vertexList[faceVertices[i,1],j]  # X coordinate of vertex 1
+            print vertexList[faceVertices[i,j]+1,l]  # X coordinate of vertex 1
+            l++
             print j + "19"
-            print vertexList[faceVertices[i,0],j]  # Y coordinate of vertex 1
+            print vertexList[faceVertices[i,j]+1,l]  # Y coordinate of vertex 1
             print j + "29"
-            print vertexList[faceVertices[i,0],j]  # Z coordinate of vertex 1
-            print "0"  # End of LINE entity
+            l++
+            print vertexList[faceVertices[i,j]+1,l]  # Z coordinate of vertex 1
         }
+            print "0"  # End of LINE entity
     }
 }
 
