@@ -24,29 +24,31 @@ BEGIN {
     print "0"
 }
 
-# Process vertex data
+# Storing Number of Vertices
 /^element vertex/ {
-    vertices = $3
+    verticesNum = $3
 }
-# Process face data
+# Storing Number of Faces
 /^element face/ {
-    faces = $3
+    facesNum = $3
 }
+
+#Storing Vertices and Faces Data In Arrays of Arrays
 {
     if($1 ~ /^(end_header)$/){
         getline
-        for (i = 1; i <= vertices; i++) {
-            for (j = 1; j < vertices; j++) {
-                vertexList[i,j] = $j
-                # print vertexList[i,j]
+        for (i = 1; i <= verticesNum; i++) {
+            for (j = 1; j < 4; j++) {
+                verticesList[i,j] = $j
+                # print verticesList[i,j]
             }
-                getline 
+            getline 
         }
-        for(a = 1; a <= faces; a++){
+        for(a = 1; a <= facesNum; a++){
             faceVerticesNum[a] = $1
             for(b = 1; b <= faceVerticesNum[a]; b++){
-                faceVertices[a][b] = $(b+1)
-                # print faceVertices[a][b]
+                facesList[a][b] = $(b+1)
+                # print facesList[a][b]
             }       
         getline
         }
@@ -55,19 +57,22 @@ BEGIN {
 
 END{
     
-    for(i = 1; i <= vertices; i++){
-        print "VERTEX"
+    #Printing Vertices Data in DXF Format
+    for(i = 1; i <= verticesNum; i++){
+        print "VERTEX" #Start Entity
         print "8"
-        print "0"
-        print "10"
-        print vertexList[i,1]
-        print "20"
-        print vertexList[i,2]
-        print "30"
-        print vertexList[i,3]
-        print "0"
+        print "0" #Layer Name
+        print "10" #X-axis
+        print verticesList[i,1]
+        print "20" #Y-axis
+        print verticesList[i,2]
+        print "30" #Z-axis
+        print verticesList[i,3]
+        print "0" #End Entity
     }
-    for (i = 1; i <= faces; i++) {
+
+    #Printing Faces Data in DXF Format
+    for (i = 1; i <= facesNum; i++) {
         print "FACE"
 
         print "0"
@@ -79,9 +84,10 @@ END{
             l = 1
             while(l <= 3){
                 print (10 * l) + j - 1
-                print vertexList[faceVertices[i][j]+1,l]
+                print verticesList[facesList[i][j]+1,l]
                 l++;
             }
+            # The Boundary of the While Loop is 3 because it's the maximum multiple of 10 we need
         }
             print "0"  # End of LINE entity
     }
