@@ -34,21 +34,11 @@ class Line {
     }
 }
 
-# class Face {
-#     [Line]$l1
-#     [Line]$l2
-#     [Line]$l3
-#     [Line]$l4
-#     Face([Line]$l1, [Line]$l2, [Line]$l3, [Line]$l4) {
-#         $this.l1 = $l1
-#         $this.l2 = $l2
-#         $this.l3 = $l3
-#         $this.l4 = $l4
-#     }
-#     Face() {
-#     }
-# }
 class Face {
+    [Vertex]$v1
+    [Vertex]$v2
+    [Vertex]$v3
+
     [Vertex[]]$vlist = @($v1, $v2, $v3)
     [int]$vnum = $vlist.Count
 
@@ -59,9 +49,6 @@ class Face {
     [void] AddVertex([Vertex]$newVertex) {
         $this.vlist += $newVertex
     }
-    # [void] AddLine([Line]$newLine) {
-    #     $this | Add-Member -NotePropertyName "newLine" -NotePropertyValue $newLine
-    # }
     Face() {
         
     }
@@ -75,9 +62,10 @@ $line = @()
 $lines = @()
 $points = @()
 $spoint = ""
-$i = 1
+$i = 0
 $j = 1
 $k = 0
+$l = 1
 $debuga = @()
 $debug = 0
 $faces = 0
@@ -85,13 +73,12 @@ $face = ""
 $object = ""
 $indices = ""
 $vertex_count = 0
-$record_num = 0
+$record_num = 1
 $verticesArray = @()
 $records = Get-Content -Path $InputFilePath   # Read the lines from the input file
 
 foreach ($record in $records) {
-    $x = $y = $z = $x1 = $y1 = $z1 = $x2 = $y2 = $z2 = $x3 = $y3 = $z3 = $x4 = $y4 = $z4 = $point1 = $point2 = "NULL"
-    $record_num++
+    # $x = $y = $z = $x1 = $y1 = $z1 = $x2 = $y2 = $z2 = $x3 = $y3 = $z3 = $x4 = $y4 = $z4 = $point1 = $point2 = "NULL"
 
     if ($record -match "^(VERTEX|LINE|FACE|3DFACE)$") {
         # Check if the line represents a vertex or face
@@ -104,8 +91,7 @@ foreach ($record in $records) {
             $vertex = [Vertex]::new($records[$record_num + 3], $records[$record_num + 5], $records[$record_num + 7])
 
             $object += "$($vertex.x) $($vertex.y) $($vertex.z)`n"
-            $verticesList += , $vertex
-            
+            $verticesList += $vertex
             # $debuga += $vertex
         }
 
@@ -124,61 +110,63 @@ foreach ($record in $records) {
                 }
             }
             $lines += , $line
-            # $debuga = $lines
             # $debug = $lines[1].v1.x + $lines[1].v1.y + $lines[1].v1.z + $lines[1].v2.x + $lines[1].v2.y + $lines[1].v2.z
 
             $object += "$($verticesList.IndexOf($line.v1)) $($verticesList.IndexOf($line.v2))`n"
-
+            # $debuga += "$($verticesList.IndexOf($line.v1)) $($verticesList.IndexOf($line.v2))"
         }
 
         if ($record -match "^(FACE)$") {
-
             $face = [Face]::new()
-            while ($records[$record_num + $i] -ne "^(3DFACE|FACE)$") {
-                # if ($k -ge 3) {
-                #     $face.AddVertex($vertex)
-                # }
-                while ($k -lt 3) {
-                    
-                    if ($records[$record_num + $j] -match (($j * 10) + $k)) {
-                        $vertex = [Vertex]::new($records[$record_num + $i + 1], $records[$record_num + $i + 3], $records[$record_num + $i + 5])
-                        $face.vlist[$k] = $vertex 
-                    }
-                    $i += 6
+            $i = 3
+            $j = 0
+            while ($records[$record_num + $i ] -ne 0) {
+                # $debuga += "" + ($record_num + $i + 1) + "`n" + $records[$record_num + $i]
+                if ($j -ge 3) {
+                    $face.AddVertex([Vertex]::new($records[$record_num + $i + 1], $records[$record_num + $i + 3], $records[$record_num + $i + 5]))
+                    $i += 5
                     $j++
-                    if ($j -eq 3) {
-                        $k++
-                        $j = 1
-                    }
                 }
-            }
-            foreach ($vertex in $verticesList) {
-                if ($vertex.x -eq $records[$record_num + 4] -and $vertex.y -eq $records[$record_num + 6] -and $vertex.z -eq $records[$record_num + 8]) {
-                    $face.vlist[0] = $vertex
+                else {
+                    $vertex = [Vertex]::new($records[$record_num + 1 + $i], $records[$record_num + 1 + $i + 2], $records[$record_num + 1 + $i + 4])
+                    $face.vlist[$j] = $vertex
+                    $i += 5
+                    $j++
                 }
+                $i++
             }
-            $debuga = $face.vlist[0].x
-        }
-
-        elseif (-not $skipping) {
-            # If not skipping, process the object data
-            $object += "$x1 $y1 $z1`n"
-            $vertex_count++
-            if ($x2 -match '^\d+(\.\d+)?$') {
-                $object += "$x2 $y2 $z2`n"
-                $vertex_count++
-            }
-            if ($x3 -match '^\d+(\.\d+)?$') {
-                $object += "$x3 $y3 $z3`n"
-                $vertex_count++
-            }
-            if ($x4 -match '^\d+(\.\d+)?$') {
-                $object += "$x4 $y4 $z4`n"
-                $vertex_count++
-            }
+            $face.vnum = $j
+            $new = $($verticesList.IndexOf($face.vlist[1]))
+            # $object += "$($face.vnum) $($verticesList.IndexOf($face.vlist.0)) $($verticesList.IndexOf($face.vlist[1])) $($verticesList.IndexOf($face.vlist[2]))`n"
+            
+            # $debuga += "$($face.vlist[0].x) $($face.vlist[1]) $($face.vlist[2])`n"
+            # $debuga += $face.vlist[0] ,$face.vlist[1], $face.vlist[2], $face.vlist[3]
+            # $debuga += $verticesList.IndexOf([Vertex]::new(0.0, 0.0, 0.0))
+            # $debuga = $verticesList[0]
+            $debug = $new
         }
     }
+
+    # elseif (-not $skipping) {
+    #     # If not skipping, process the object data
+    #     $object += "$x1 $y1 $z1`n"
+    #     $vertex_count++
+    #     if ($x2 -match '^\d+(\.\d+)?$') {
+    #         $object += "$x2 $y2 $z2`n"
+    #         $vertex_count++
+    #     }
+    #     if ($x3 -match '^\d+(\.\d+)?$') {
+    #         $object += "$x3 $y3 $z3`n"
+    #         $vertex_count++
+    #     }
+    #     if ($x4 -match '^\d+(\.\d+)?$') {
+    #         $object += "$x4 $y4 $z4`n"
+    #         $vertex_count++
+    #     }
+    # }
+    $record_num++
 }
+
 
 $header = @"
 ply
@@ -193,7 +181,9 @@ end_header
 
 "@
 
-$header + $object + $debuga
+$object 
+$debuga
+$debug
 # + $indices| Out-File -FilePath $OutputFilePath    
 
 # + $face
