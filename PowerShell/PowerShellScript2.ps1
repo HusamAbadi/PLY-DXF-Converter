@@ -52,17 +52,19 @@ class Face {
     [Vertex[]]$vlist = @($v1, $v2, $v3)
     [int]$vnum = $vlist.Count
 
-    Face([Line[]]$lineslist, [int]$linesnum) {
-        $this.lineslist = $lineslist
-        $this.linesnum = $lineslist.Count
+    Face([Vertex[]]$vlist, [int]$vnum) {
+        $this.vlist = $vlist
+        $this.vnum = $vlist.Count
     }
-    [void] AddLine([Line]$newLine) {
-        $this.lineslist += $newLine
+    [void] AddVertex([Vertex]$newVertex) {
+        $this.vlist += $newVertex
     }
     # [void] AddLine([Line]$newLine) {
     #     $this | Add-Member -NotePropertyName "newLine" -NotePropertyValue $newLine
     # }
-
+    Face() {
+        
+    }
 }
 $verticesList = @()
 $vertex = @()
@@ -73,7 +75,9 @@ $line = @()
 $lines = @()
 $points = @()
 $spoint = ""
-$i = 0
+$i = 1
+$j = 1
+$k = 0
 $debuga = @()
 $debug = 0
 $faces = 0
@@ -130,7 +134,30 @@ foreach ($record in $records) {
         if ($record -match "^(FACE)$") {
 
             $face = [Face]::new()
-        
+            while ($records[$record_num + $i] -ne "^(3DFACE|FACE)$") {
+                # if ($k -ge 3) {
+                #     $face.AddVertex($vertex)
+                # }
+                while ($k -lt 3) {
+                    
+                    if ($records[$record_num + $j] -match (($j * 10) + $k)) {
+                        $vertex = [Vertex]::new($records[$record_num + $i + 1], $records[$record_num + $i + 3], $records[$record_num + $i + 5])
+                        $face.vlist[$k] = $vertex 
+                    }
+                    $i += 6
+                    $j++
+                    if ($j -eq 3) {
+                        $k++
+                        $j = 1
+                    }
+                }
+            }
+            foreach ($vertex in $verticesList) {
+                if ($vertex.x -eq $records[$record_num + 4] -and $vertex.y -eq $records[$record_num + 6] -and $vertex.z -eq $records[$record_num + 8]) {
+                    $face.vlist[0] = $vertex
+                }
+            }
+            $debuga = $face.vlist[0].x
         }
 
         elseif (-not $skipping) {
@@ -166,7 +193,7 @@ end_header
 
 "@
 
-$header + $object 
+$header + $object + $debuga
 # + $indices| Out-File -FilePath $OutputFilePath    
 
 # + $face
