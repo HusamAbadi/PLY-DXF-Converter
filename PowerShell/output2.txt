@@ -1,3 +1,0 @@
-"ply\r\n  format ascii 1.0\r\n  element vertex 0\r\n  property float x\r\n  property float y\r\n  property float z\r\n  element face 0\r\n  property list uchar int vertex_indices\r\n  end_header\n"
-
-

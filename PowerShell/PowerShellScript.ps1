@@ -1,183 +1,151 @@
-#To execute a PowerShell script from cmd:
-
 # powershell -File "PowershellScript.ps1"
 
 param (
     [Parameter(Mandatory = $true)]
-    [string]$InputFilePath # Path to the input file
+    [string]$InputFilePath, # Path to the input file
 
-    #     [Parameter(Mandatory = $true)]
-    #     [string]$OutputFilePath     # Path to the output file
+    [Parameter(Mandatory = $true)]
+    [string]$OutputFilePath     # Path to the output file
 )
+class Vertex {
+    [string]$x
+    [string]$y
+    [string]$z
+
+    Vertex([string]$x, [string]$y, [string]$z) {
+        $this.x = $x
+        $this.y = $y
+        $this.z = $z
+    }
+    Vertex() {
+    }
+    # Override the Equals method to compare vertices
+    [bool] Equals([object]$other) {
+        if ($other -isnot [Vertex]) {
+            return $false
+        }
+        return ($this.x -eq $other.x -and $this.y -eq $other.y -and $this.z -eq $other.z)
+    }
+}
+class Line {
+    [Vertex]$v1
+    [Vertex]$v2
+
+    Line([Vertex]$v1, [Vertex]$v2) {
+        $this.v1 = $v1
+        $this.v1 = $v2
+    }
+    Line() {
+    }
+}
+
+class Face {
+    [Vertex]$v1
+    [Vertex]$v2
+    [Vertex]$v3
+
+    [Vertex[]]$vlist = @($v1, $v2, $v3)
+    [int]$vnum = $vlist.Count
+
+    Face([Vertex[]]$vlist) {
+        $this.vlist = $vlist
+        $this.vnum = $vlist.Count
+    }
+    [void] AddVertex([Vertex]$newVertex) {
+        $this.vlist += $newVertex
+    }
+    Face() {
+        $this.vlist = @()
+        $this.vnum = 0
+    }
+    [int] IndexOfVertex([Vertex]$vertex) {
+        return [Array]::IndexOf($this.vlist, $vertex)
+    }
+}
 $verticesList = @()
 $vertex = @()
-$svertex = ""
-$vertex2show = ""
-$line2show = ""
 $line = @()
-$points = @()
-$spoint = ""
+$lines = @()
 $i = 0
+$j = 1
 $debuga = @()
 $debug = 0
-$faces = 0
+$face_count = 0
 $face = ""
 $object = ""
-$indices = ""
 $vertex_count = 0
-$record_num = 0
-$verticesArray = @()
+$record_num = 1
 $records = Get-Content -Path $InputFilePath   # Read the lines from the input file
 
 foreach ($record in $records) {
-    $x = $y = $z = $x1 = $y1 = $z1 = $x2 = $y2 = $z2 = $x3 = $y3 = $z3 = $x4 = $y4 = $z4 = $point1 = $point2 = "NULL"
-    $record_num++
-
-    if ($record -match "^(VERTEX|LINE|FACE|3DFACE)$") {
-        # Check if the line represents a vertex or face
-        $skipping = $true
-        $face_vertices = 0
-        $aFACE = $false
-
-        if ($record -match "^(VERTEX)$") {
-            $vertex = New-Object PSObject -Property @{
-                # $x = $records[$record_num + 2]
-                # $y = $records[$record_num + 4]
-                # $z = $records[$record_num + 6]
-            }
-            $x = $records[$record_num + 3]
-            $y = $records[$record_num + 5]
-            $z = $records[$record_num + 7]
-
-            $vertex2show += "$x $y $z`n"
-            
-            $vertex = @($x, $y, $z)
-            $verticesList += , $vertex
-            $debuga = $verticesList
-        }
-
-        if ($record -match "^(LINE)$") {
-            $x = $records[$record_num + 3]
-            $y = $records[$record_num + 5]
-            $z = $records[$record_num + 7]
-            $point1 = @($x, $y, $z)
-            $points += , $point1
-            
-            $x2 = $records[$record_num + 9]
-            $y2 = $records[$record_num + 11]
-            $z2 = $records[$record_num + 13]
-            $point2 = @($x2, $y2, $z2)
-            $points += , $point2
-            
-            # $debuga = $points[0] + $points[1] + $points[2] + $points[3]
-            foreach ($point in $points) {
-                $spoint = $point -join ", "
-                foreach ($vertex in $verticesList) {
-                    $svertex = $vertex -join ", "
-                    if ($spoint -eq $svertex) {
-                        $debug++
-                        # $line2show += $verticesList.IndexOf($vertex)
-                        $line += $verticesList.IndexOf($vertex)
-                        # $debug += $verticesList.IndexOf($vertex)
-                        # $debuga += "`n$svertex`n$spoint`n"
-                    }
-                }
-            }
-            # for (let i = 0; i -lt array.length; i += 2) {
-            #     console.log(`$ { array[i] } ${array[i + 1]})
-            #     }
-            # $lines += , @($point1 + $point2)
-            # $lines += , $line 
-            # $deblines += $LPoint1, $LPoint2
-            
-            # foreach ($point in $lines) {
-            #     $debug += $point 
-            #     # if ($point -eq $verticesList[0]) {
-            #     #     $debug += $point 
-            #     # }
-            #     $i++
-            # }
-            
-        }
-
-
-        # if ($x -match "^ *10 *$") {
-        #     # Check if the line contains x1, y1, z1 coordinates
-        #     $skipping = $false
-        #     $x1 = $records[$record_num + 3]
-        #     $y1 = $records[$record_num + 5]
-        #     $z1 = $records[$record_num + 7]
-        # }
         
-        # $x = $records[$records.IndexOf($record) + 9]
-        # if ($x -match "^ *11 *$") {
-        #     # Check if the line contains x2, y2, z2 coordinates
-        #     $skipping = $false
-        #     $x2 = $records[$record_num + 9]
-        #     $y2 = $records[$record_num + 11]
-        #     $z2 = $records[$record_num + 13]
-        # }
+    if ($record -match "^(VERTEX)$") {
+        $vertex_count++
+        $vertex = [Vertex]::new($records[$record_num + 3], $records[$record_num + 5], $records[$record_num + 7])
 
-        # $x = $records[$records.IndexOf($record) + 15]
-        # if ($x -match "^ *12 *$") {
-        #     # Check if the line contains x3, y3, z3 coordinates
-        #     $face_vertices++
-        #     $x3 = $records[$record_num + 15]
-        #     $y3 = $records[$record_num + 17]
-        #     $z3 = $records[$record_num + 19]
-        # }
+        $verticesList += $vertex
+        $object += "$($vertex.x) $($vertex.y) $($vertex.z)`n"
+        # $debuga += $vertex
+    }
 
-        # $x = $records[$records.IndexOf($record) + 21]
-        # if ($x -match "^ *13 *$") {
-        #     # Check if the line contains x4, y4, z4 coordinates
-        #     $face_vertices++
-        #     $x4 = $records[$record_num + 21]
-        #     $y4 = $records[$record_num + 23]
-        #     $z4 = $records[$record_num + 25]
-        # }
+    if ($record -match "^(LINE)$") {
+            
+        $line = [Line]::new()
 
-        # if ($record -match "^(FACE| 3DFACE)$") {
-        #     # If it's a 3DFACE, process the face data
-        #     $faces++    # Increment the face count
-        #     $face += "$x1 $y1 $z1`n$x2 $y2 $z2`n"
-        #     if ($x3 -match '^\d+(\.\d+)?$') {
-        #         # Check if we have a valid 3rd vertex 
-        #         $face += "$x3 $y3 $z3`n"
-        #         $face_vertices++
-        #     }
-        #     if ($x4 -match '^\d+(\.\d+)?$') {
-        #         # Check if we have a valid 4th vertex
-        #         $face += "$x4 $y4 $z4`n"
-        #         $face_vertices++
-        #     }
-                
-        #     $vertex_indices = $vertex_count
-        #     $indices += "$face_vertices"
-        #     for ($i = 0; $i -lt $face_vertices; $i++) {
-        #         $indices += " $($vertex_indices + $i + 1)"   # Add vertex indices to the indices string
-        #     }
-        #     $indices += "`n"
-
-        #     $vertex_count += $face_vertices   # Increment the vertex count
-        # }
-        elseif (-not $skipping) {
-            # If not skipping, process the object data
-            $object += "$x1 $y1 $z1`n"
-            $vertex_count++
-            if ($x2 -match '^\d+(\.\d+)?$') {
-                $object += "$x2 $y2 $z2`n"
-                $vertex_count++
+        foreach ($vertex in $verticesList) {
+            if ($vertex.x -eq $records[$record_num + 3] -and $vertex.y -eq $records[$record_num + 5] -and $vertex.z -eq $records[$record_num + 7]) {
+                $line.v1 = $vertex
+                # $debuga += $line.v1.x
             }
-            if ($x3 -match '^\d+(\.\d+)?$') {
-                $object += "$x3 $y3 $z3`n"
-                $vertex_count++
-            }
-            if ($x4 -match '^\d+(\.\d+)?$') {
-                $object += "$x4 $y4 $z4`n"
-                $vertex_count++
+            if ($vertex.x -eq $records[$record_num + 9] -and $vertex.y -eq $records[$record_num + 11] -and $vertex.z -eq $records[$record_num + 13]) {
+                $line.v2 = $vertex
+                # $debuga += $line.v2.x
             }
         }
+        $lines += , $line
+        # $debug = $lines[1].v1.x + $lines[1].v1.y + $lines[1].v1.z + $lines[1].v2.x + $lines[1].v2.y + $lines[1].v2.z
+
+        $object += "$($verticesList.IndexOf($line.v1)) $($verticesList.IndexOf($line.v2))`n"
+        # $debuga += "$($verticesList.IndexOf($line.v1)) $($verticesList.IndexOf($line.v2))"
     }
+
+    if ($record -match "^(FACE)$") {
+        $face_count++
+        $face = [Face]::new()
+        $i = 3
+        $j = 0
+        while ($records[$record_num + $i ] -ne 0) {
+            # $debuga += "" + ($record_num + $i + 1) + "`n" + $records[$record_num + $i]
+            if ($j -ge 3) {
+                $face.AddVertex([Vertex]::new($records[$record_num + $i + 1], $records[$record_num + $i + 3], $records[$record_num + $i + 5]))
+                $i += 5
+                $j++
+            }
+            else {
+                $vertex = [Vertex]::new($records[$record_num + 1 + $i], $records[$record_num + 1 + $i + 2], $records[$record_num + 1 + $i + 4])
+                $face.vlist += ($vertex)
+                $i += 5
+                # $object += $verticesList.IndexOf($face.vlist[$j])
+                $j++
+                # $object += [string[]]$verticesList.IndexOf([string[]]$vertex)
+                # $object += $verticesList.IndexOf([Vertex]("0.0, 0.0, 0.0"))
+            }
+            $i++
+        }
+        $face.vnum = $j
+        $object += "$($face.vnum) "
+        foreach ($faceVertex in $face.vlist) {
+            $index = $verticeslist.IndexOf($faceVertex)
+            if ($index -ne -1) {
+                $object += "$($index) "
+            }
+        }
+        $object += "`n"
+        $face.vnum = $j
+        # $debuga += "$($face.vlist[0].x) $($face.vlist[1]) $($face.vlist[2])`n"
+        # $debuga += $face.vlist[0] ,$face.vlist[1], $face.vlist[2], $face.vlist[3]
+    }
+    $record_num++
 }
 
 $header = @"
@@ -187,14 +155,11 @@ element vertex $vertex_count
 property float x
 property float y
 property float z
-element face $faces
+element face $face_count
 property list uchar int vertex_indices
 end_header
 
 "@
 
-# $verticesList + "`n" + $line[0] + "`n" + $debug
-$header + $vertex2show + $line2show + $debug + $debuga
-# + $indices| Out-File -FilePath $OutputFilePath    
-
-# + $face
+$header + $object | Out-File -FilePath $OutputFilePath
+# $debuga
