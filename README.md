@@ -1,10 +1,11 @@
 # PLY-DXF_Converter
 
-## This Project Was Created as a Homework submission for a subject called 'System Programming' in the university of Pecs, Hungary. CSE.
+## This Project Was Created As A Homework Submission For A Subject Called 'System Programming' In The University Of Pecs, Hungary. CSE.
 
+## The Homework Contains Two Parts:
 
-### The Homework containt two parts:
+### 1- PLY To DXF Using AWK: Creating A Script That Converts PLY Formatted File Content To DXF Format Using AWK Scripting Language
+### 2- DXF To PLY Using PowerShell: Creating A Script That Converts DXF Formatted File Content To PLY Format Using PowerShell Scripting Language
 
-### 1- PLY To DXF using AWK: creating a script that converts ply formatted file content to dxf format using AWK scripting language
-
-### 2- DXF To PLY using PowerShell: creating a script that converts dxf formatted file content to ply format using PowerShell scripting language
+## I Had Great Fun Coding The Scripts!
+## I Learnt A Lot!
